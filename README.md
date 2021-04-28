@@ -70,3 +70,144 @@ Which component affects what?
 1. Using a subset of the performance equation as a performance measure
 2. Expecting the improvement of overall performance by the same ratio of improvement of one aspect
 
+# MIPS Instruction Types
+
+The MIPS architecture has 3 types of instructions:
+
+## 1. ALU Instructions (R-type)
+
+Logical and Arithmetic operations such as: ADD, SUB, AND, shift
+### IR format
+
+![](assets/r_type_IR_2.png)
+
+**op**: opcode for instruction
+**rs**: address of source1 register
+**rt**: address of source2 register
+**rd**: address of destination register
+**shmat**: shift amount
+**funct**: type of ALU operation
+
+## 2. Immediate Format Instructions (I-type)
+
+Instructions with immediates, such as 
+- **lw** and **sw** (offset counts as immediate) `lw Rt, N(Rs)`, `sw Rt, N(Rs)`
+- branches like **beq** and **bne** `beq Rs, Rt, Label`
+
+### IR format
+
+![](assets/i_type_IR_2.png)
+
+## 3. Jump Format Instructions (J-type)
+
+- Conditional and Unconditional branches
+- They cause an immediate value to be added to PC
+
+### IR format
+
+![](assets/j_type_IR.png)
+
+# MIPS Stages of Execution
+
+The MIPS ISA breaks down the execution of all types of instructions into 5 stages:
+1. Instruction Fetch	
+2. Instrucion Decode	
+3. ALU / Instruction Execute
+4. Memory	Access	
+5. Register	Write (Write-Back)	
+
+Each stage is executed in a whole cycle.
+
+## 1. Instruction Fetch (IF)
+
+Fetching the instruction involves:
+- Reading the instruction from instruction memory
+- Updating the PC to hold address of next instruction
+
+![](assets/IF_stage.png)
+
+**Note**: Updating the PC and fetching the instruction occurs every instruction so it does not need special control signals.
+
+## 2. Instruction Decode (ID)
+
+Decoding the instruction involves:
+- Sending opcode of fetched instruction into control unit
+- Reading values from register file
+
+![](assets/ID_stage.png)
+
+## 3. Instruction Execute (IE)
+
+- This is the core of the instruction execution, it executes the instruction logic itself.
+- Only for R-type and I-type instructions
+
+For each instruction type we have a different flow:
+
+- R-type:
+  - Perform the ALU operation on the source registers
+- I-type:
+  - For **lw** and **sw**: calculate the offset of the memory address
+  - For **branch**: compute branch condition (if exists) and compute branch offset
+
+## 4. Memory Access (MEM)
+
+- Only for **lw** and **sw**
+- Access the memory to fetch or store values.
+- For **lw**, the actual value fetched from memory is moved to the register on the next cycle.
+## 5. Write-Back (WB)
+
+- Only for **Register-Register ALU** instructions or **lw** instruction
+- Writes the data into the destination register
+
+# MIPS Single Cycle Datapath
+
+![](assets/MIPS_single_cycle_datapath.png)
+
+The separate stages and components are controlled by a **Control Unit** that is responsible for setting the control signals based on the instruction
+
+![](assets/MIPS_single_cycle_datapath_CU.png)
+
+**Note**: You are encouraged to refer to the lecture here and trace each instruction type execution flow on the single cycle datapath.
+
+
+## Executing multiple instructions
+
+When executing a single instruction at a time:
+
+![](assets/MIPS_single_cycle_execution.png)
+
+# Pipelining
+
+- Pipelining is overlapping processor subtasks to enhance performance
+- It does not increase latency of single task, but it increases throughput of entire processor
+  - i.e. it reduces average instruction time, therefore reducing average CPI
+
+![](assets/MIPS_pipelining_overview.png)
+
+## Benchmarking pipelining
+
+- For the first instruction in a pipelining flow, we take $t \cdot k$ time, where $t$ is the time of the longest stage, $k$ is number of stages
+  - However for next instructions we only need $t$ time for each.
+
+- For **n** iterations of tasks, the execution times of $k$-stage pipeline:
+  - With no pipelining: $nk$ time units
+  - With pipelining: $k + (n-1)$ time units
+  - Speedup: $\dfrac{nk}{k+(n-1)} = k$ for large $n$
+
+
+## Executing multiple instructions
+
+- We can overlap stages and execute multiple stages at the same time, resulting in a huge performance boost
+- Note that the execution time of any stage is the time of the longest stage
+
+![](assets/MIPS_pipelining_execution.png)
+
+## The pipelined datapath
+
+- Need to add registers between stages to avoid data corruption
+
+![](assets/MIPS_pipelined_datapath_correct.png)
+
+The **Control Unit** needs to deal with the registers between stages instead of the units themselves.
+
+![](assets/MIPS_pipelined_datapath_CU.png)

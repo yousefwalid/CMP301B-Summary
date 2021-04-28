@@ -365,6 +365,155 @@ number of cycles required for various instructions</p>
 <li>Using a subset of the performance equation as a performance measure</li>
 <li>Expecting the improvement of overall performance by the same ratio of improvement of one aspect</li>
 </ol>
+<h1 class="mume-header" id="mips-instruction-types">MIPS Instruction Types</h1>
+
+<p>The MIPS architecture has 3 types of instructions:</p>
+<h2 class="mume-header" id="1-alu-instructions-r-type">1. ALU Instructions (R-type)</h2>
+
+<p>Logical and Arithmetic operations such as: ADD, SUB, AND, shift</p>
+<h3 class="mume-header" id="ir-format">IR format</h3>
+
+<p><img src="assets/r_type_IR_2.png" alt></p>
+<p><strong>op</strong>: opcode for instruction<br>
+<strong>rs</strong>: address of source1 register<br>
+<strong>rt</strong>: address of source2 register<br>
+<strong>rd</strong>: address of destination register<br>
+<strong>shmat</strong>: shift amount<br>
+<strong>funct</strong>: type of ALU operation</p>
+<h2 class="mume-header" id="2-immediate-format-instructions-i-type">2. Immediate Format Instructions (I-type)</h2>
+
+<p>Instructions with immediates, such as</p>
+<ul>
+<li><strong>lw</strong> and <strong>sw</strong> (offset counts as immediate) <code>lw Rt, N(Rs)</code>, <code>sw Rt, N(Rs)</code></li>
+<li>branches like <strong>beq</strong> and <strong>bne</strong> <code>beq Rs, Rt, Label</code></li>
+</ul>
+<h3 class="mume-header" id="ir-format-1">IR format</h3>
+
+<p><img src="assets/i_type_IR_2.png" alt></p>
+<h2 class="mume-header" id="3-jump-format-instructions-j-type">3. Jump Format Instructions (J-type)</h2>
+
+<ul>
+<li>Conditional and Unconditional branches</li>
+<li>They cause an immediate value to be added to PC</li>
+</ul>
+<h3 class="mume-header" id="ir-format-2">IR format</h3>
+
+<p><img src="assets/j_type_IR.png" alt></p>
+<h1 class="mume-header" id="mips-stages-of-execution">MIPS Stages of Execution</h1>
+
+<p>The MIPS ISA breaks down the execution of all types of instructions into 5 stages:</p>
+<ol>
+<li>Instruction Fetch</li>
+<li>Instrucion Decode</li>
+<li>ALU / Instruction Execute</li>
+<li>Memory	Access</li>
+<li>Register	Write (Write-Back)</li>
+</ol>
+<p>Each stage is executed in a whole cycle.</p>
+<h2 class="mume-header" id="1-instruction-fetch-if">1. Instruction Fetch (IF)</h2>
+
+<p>Fetching the instruction involves:</p>
+<ul>
+<li>Reading the instruction from instruction memory</li>
+<li>Updating the PC to hold address of next instruction</li>
+</ul>
+<p><img src="assets/IF_stage.png" alt></p>
+<p><strong>Note</strong>: Updating the PC and fetching the instruction occurs every instruction so it does not need special control signals.</p>
+<h2 class="mume-header" id="2-instruction-decode-id">2. Instruction Decode (ID)</h2>
+
+<p>Decoding the instruction involves:</p>
+<ul>
+<li>Sending opcode of fetched instruction into control unit</li>
+<li>Reading values from register file</li>
+</ul>
+<p><img src="assets/ID_stage.png" alt></p>
+<h2 class="mume-header" id="3-instruction-execute-ie">3. Instruction Execute (IE)</h2>
+
+<ul>
+<li>This is the core of the instruction execution, it executes the instruction logic itself.</li>
+<li>Only for R-type and I-type instructions</li>
+</ul>
+<p>For each instruction type we have a different flow:</p>
+<ul>
+<li>R-type:
+<ul>
+<li>Perform the ALU operation on the source registers</li>
+</ul>
+</li>
+<li>I-type:
+<ul>
+<li>For <strong>lw</strong> and <strong>sw</strong>: calculate the offset of the memory address</li>
+<li>For <strong>branch</strong>: compute branch condition (if exists) and compute branch offset</li>
+</ul>
+</li>
+</ul>
+<h2 class="mume-header" id="4-memory-access-mem">4. Memory Access (MEM)</h2>
+
+<ul>
+<li>Only for <strong>lw</strong> and <strong>sw</strong></li>
+<li>Access the memory to fetch or store values.</li>
+<li>For <strong>lw</strong>, the actual value fetched from memory is moved to the register on the next cycle.</li>
+</ul>
+<h2 class="mume-header" id="5-write-back-wb">5. Write-Back (WB)</h2>
+
+<ul>
+<li>Only for <strong>Register-Register ALU</strong> instructions or <strong>lw</strong> instruction</li>
+<li>Writes the data into the destination register</li>
+</ul>
+<h1 class="mume-header" id="mips-single-cycle-datapath">MIPS Single Cycle Datapath</h1>
+
+<p><img src="assets/MIPS_single_cycle_datapath.png" alt></p>
+<p>The separate stages and components are controlled by a <strong>Control Unit</strong> that is responsible for setting the control signals based on the instruction</p>
+<p><img src="assets/MIPS_single_cycle_datapath_CU.png" alt></p>
+<p><strong>Note</strong>: You are encouraged to refer to the lecture here and trace each instruction type execution flow on the single cycle datapath.</p>
+<h2 class="mume-header" id="executing-multiple-instructions">Executing multiple instructions</h2>
+
+<p>When executing a single instruction at a time:</p>
+<p><img src="assets/MIPS_single_cycle_execution.png" alt></p>
+<h1 class="mume-header" id="pipelining">Pipelining</h1>
+
+<ul>
+<li>Pipelining is overlapping processor subtasks to enhance performance</li>
+<li>It does not increase latency of single task, but it increases throughput of entire processor
+<ul>
+<li>i.e. it reduces average instruction time, therefore reducing average CPI</li>
+</ul>
+</li>
+</ul>
+<p><img src="assets/MIPS_pipelining_overview.png" alt></p>
+<h2 class="mume-header" id="benchmarking-pipelining">Benchmarking pipelining</h2>
+
+<ul>
+<li>
+<p>For the first instruction in a pipelining flow, we take <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>&#x22C5;</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">t \cdot k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">&#x22C5;</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> time, where <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span></span></span></span> is the time of the longest stage, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> is number of stages</p>
+<ul>
+<li>However for next instructions we only need <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span></span></span></span> time for each.</li>
+</ul>
+</li>
+<li>
+<p>For <strong>n</strong> iterations of tasks, the execution times of <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span>-stage pipeline:</p>
+<ul>
+<li>With no pipelining: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>k</mi></mrow><annotation encoding="application/x-tex">nk</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">nk</span></span></span></span> time units</li>
+<li>With pipelining: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>+</mo><mo stretchy="false">(</mo><mi>n</mi><mo>&#x2212;</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">k + (n-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.77777em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">&#x2212;</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span> time units</li>
+<li>Speedup: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>n</mi><mi>k</mi></mrow><mrow><mi>k</mi><mo>+</mo><mo stretchy="false">(</mo><mi>n</mi><mo>&#x2212;</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mfrac></mstyle><mo>=</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">\dfrac{nk}{k+(n-1)} = k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.30744em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">&#x2212;</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">nk</span></span></span></span><span class="vlist-s">&#x200B;</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> for large <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">n</span></span></span></span></li>
+</ul>
+</li>
+</ul>
+<h2 class="mume-header" id="executing-multiple-instructions-1">Executing multiple instructions</h2>
+
+<ul>
+<li>We can overlap stages and execute multiple stages at the same time, resulting in a huge performance boost</li>
+<li>Note that the execution time of any stage is the time of the longest stage</li>
+</ul>
+<p><img src="assets/MIPS_pipelining_execution.png" alt></p>
+<h2 class="mume-header" id="the-pipelined-datapath">The pipelined datapath</h2>
+
+<ul>
+<li>Need to add registers between stages to avoid data corruption</li>
+</ul>
+<p><img src="assets/MIPS_pipelined_datapath_correct.png" alt></p>
+<p>The <strong>Control Unit</strong> needs to deal with the registers between stages instead of the units themselves.</p>
+<p><img src="assets/MIPS_pipelined_datapath_CU.png" alt></p>
 
       </div>
       
