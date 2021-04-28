@@ -1,3 +1,5 @@
+# CMP301B: Computer Architecture
+
 # Introduction
 
 A program performance is affected by:
