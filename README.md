@@ -211,3 +211,63 @@ When executing a single instruction at a time:
 The **Control Unit** needs to deal with the registers between stages instead of the units themselves.
 
 ![](assets/MIPS_pipelined_datapath_CU.png)
+
+# Pipelining Hazards
+
+- Situations that prevent an instruction from being executed in its designated clock cycle
+
+- The simplest solution for hazards is to stall the pipeline (not efficient)
+  - We can solve some situation of the hazards without affecting performance as much.
+
+## Structural Hazards
+
+- Happens when multiple stages want to use the same hardware at the same time.
+- Conflict for use of a resource.
+- Usually solved by throwing more hardware at the problem.
+
+Occurs in two scenarios:
+
+1. Load/Store instruction trying to read/write memory while another instruction is being fetched
+    - ![](assets/structural_hazards_memory.png)
+    - **Solution**: can separate instruction memory and data memory into separate hardwares.
+2. One instruction trying to write into a register while another is reading from it in the same clock cycle
+    - ![](assets/structural_hazards_register.png)
+    - **Solution**:
+      - Write during first 1/2 of the clock cycle, Read during second 1/2 of the clock cycle
+      - Build RegFile with independent read/write ports
+
+
+**Note:** We can also stall the pipeline to solve structural hazards, however is this is unnecessary.
+
+## Data Hazards
+
+- Occurs due to dependency of data between two instructions
+
+![](assets/data_hazard_example.png)
+
+**Instructions with red back arrows cannot be executed in time**
+
+Solutions:
+
+1. Reorder code structure (software solution):
+    - Change the order of the instructions to remove dependencies (need to have independent instruction somewhere)
+    - If we cannot find any independent instructions:
+      - Insert NOP to delay pipeline (adding software bubble)
+
+2. Stalling the pipeline with hardware
+   - Need special hardware to check for dependency
+  
+3. Forwarding: 
+   - Forward data as soon as it is available, don't wait for the whole pipeline to finish
+   - We can use the output of the ALU and inject it in parallel instructions instead of waiting for write-back
+   - ![](assets/data_forwarding_example.png)
+   - This can be acheived by adding special hardware to forward data backwards
+   - ![](assets/data_forwarding_hardware.png)
+   - In some cases, forwarding does not completely solve the problem of data hazards
+   - e.g. ![](assets/data_forwarding_load.png)
+   - We can do forwarding if we stall the next instruction after the `lw`
+   - ![](assets/data_forwarding_load_solved.png)
+
+**Note:** We can change the ordering of instructions to fix the `lw` forwarding problem
+
+![](assets/data_forwarding_load_reorder.png)

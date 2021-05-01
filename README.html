@@ -514,6 +514,90 @@ number of cycles required for various instructions</p>
 <p><img src="assets/MIPS_pipelined_datapath_correct.png" alt></p>
 <p>The <strong>Control Unit</strong> needs to deal with the registers between stages instead of the units themselves.</p>
 <p><img src="assets/MIPS_pipelined_datapath_CU.png" alt></p>
+<h1 class="mume-header" id="pipelining-hazards">Pipelining Hazards</h1>
+
+<ul>
+<li>
+<p>Situations that prevent an instruction from being executed in its designated clock cycle</p>
+</li>
+<li>
+<p>The simplest solution for hazards is to stall the pipeline (not efficient)</p>
+<ul>
+<li>We can solve some situation of the hazards without affecting performance as much.</li>
+</ul>
+</li>
+</ul>
+<h2 class="mume-header" id="structural-hazards">Structural Hazards</h2>
+
+<ul>
+<li>Happens when multiple stages want to use the same hardware at the same time.</li>
+<li>Conflict for use of a resource.</li>
+<li>Usually solved by throwing more hardware at the problem.</li>
+</ul>
+<p>Occurs in two scenarios:</p>
+<ol>
+<li>Load/Store instruction trying to read/write memory while another instruction is being fetched
+<ul>
+<li><img src="assets/structural_hazards_memory.png" alt></li>
+<li><strong>Solution</strong>: can separate instruction memory and data memory into separate hardwares.</li>
+</ul>
+</li>
+<li>One instruction trying to write into a register while another is reading from it in the same clock cycle
+<ul>
+<li><img src="assets/structural_hazards_register.png" alt></li>
+<li><strong>Solution</strong>:
+<ul>
+<li>Write during first 1/2 of the clock cycle, Read during second 1/2 of the clock cycle</li>
+<li>Build RegFile with independent read/write ports</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>Note:</strong> We can also stall the pipeline to solve structural hazards, however is this is unnecessary.</p>
+<h2 class="mume-header" id="data-hazards">Data Hazards</h2>
+
+<ul>
+<li>Occurs due to dependency of data between two instructions</li>
+</ul>
+<p><img src="assets/data_hazard_example.png" alt></p>
+<p><strong>Instructions with red back arrows cannot be executed in time</strong></p>
+<p>Solutions:</p>
+<ol>
+<li>
+<p>Reorder code structure (software solution):</p>
+<ul>
+<li>Change the order of the instructions to remove dependencies (need to have independent instruction somewhere)</li>
+<li>If we cannot find any independent instructions:
+<ul>
+<li>Insert NOP to delay pipeline (adding software bubble)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Stalling the pipeline with hardware</p>
+<ul>
+<li>Need special hardware to check for dependency</li>
+</ul>
+</li>
+<li>
+<p>Forwarding:</p>
+<ul>
+<li>Forward data as soon as it is available, don&apos;t wait for the whole pipeline to finish</li>
+<li>We can use the output of the ALU and inject it in parallel instructions instead of waiting for write-back</li>
+<li><img src="assets/data_forwarding_example.png" alt></li>
+<li>This can be acheived by adding special hardware to forward data backwards</li>
+<li><img src="assets/data_forwarding_hardware.png" alt></li>
+<li>In some cases, forwarding does not completely solve the problem of data hazards</li>
+<li>e.g. <img src="assets/data_forwarding_load.png" alt></li>
+<li>We can do forwarding if we stall the next instruction after the <code>lw</code></li>
+<li><img src="assets/data_forwarding_load_solved.png" alt></li>
+</ul>
+</li>
+</ol>
+<p><strong>Note:</strong> We can change the ordering of instructions to fix the <code>lw</code> forwarding problem</p>
+<p><img src="assets/data_forwarding_load_reorder.png" alt></p>
 
       </div>
       
