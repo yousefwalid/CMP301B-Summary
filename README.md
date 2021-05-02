@@ -225,7 +225,7 @@ The **Control Unit** needs to deal with the registers between stages instead of 
 - Conflict for use of a resource.
 - Usually solved by throwing more hardware at the problem.
 
-Occurs in two scenarios:
+### Scenarios
 
 1. Load/Store instruction trying to read/write memory while another instruction is being fetched
     - ![](assets/structural_hazards_memory.png)
@@ -247,7 +247,7 @@ Occurs in two scenarios:
 
 **Instructions with red back arrows cannot be executed in time**
 
-Solutions:
+### Solutions
 
 1. Reorder code structure (software solution):
     - Change the order of the instructions to remove dependencies (need to have independent instruction somewhere)
@@ -271,3 +271,43 @@ Solutions:
 **Note:** We can change the ordering of instructions to fix the `lw` forwarding problem
 
 ![](assets/data_forwarding_load_reorder.png)
+
+## Control Hazards
+
+- Occurs due to branching instructions
+- Fetching instructions depends on branch outcome
+- MIPS only has BEQ, BNE
+
+How much cycles are lost?
+
+![](assets/control_hazard_cycles_lost.png)
+
+We lose 2 cycles if the branch is taken, because: 
+- One instruction is fetched and is in the register phase
+- Another one is in fetch phase
+
+**Note:** If we wait and get the branch result from the memory phase, we will lose 3 cycles instead.
+
+### Reducing penalty
+
+We can reduce the penalty to **1 cycle** if we add extra hardware to evaluate the branch result right after the register stage.
+
+![](assets/control_hazard_reduce_penalty.png)
+
+This way we only need to deal with one wrongly fetched instruction.
+
+### Solutions
+
+After reducing the branch penalty to 1 cycle, we also need to fix the instruction fetched in that cycle
+
+1. Stall the pipeline
+   - We can stall the pipeline if the branch is taken, which gives us time to flush the wrong instructions
+   - Inefficient solution
+2. Predict the outcome of the branch, and fix if wrong
+   - It is better to guess and be wrong sometimes than always wait
+   - Assume that the branch will be **untaken**
+   - If it is not taken, then we have not wasted any cycles.
+   - If it is taken, insert a bubble and waste one cycle.
+   - ![](assets/control_hazards_branch_taken.png)
+
+**Note:** an old solution was to always execute the instruction after the branch anyway, and the software programmer had to either put an independent instruction to the branch or insert a NOP.

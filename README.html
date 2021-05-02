@@ -534,7 +534,8 @@ number of cycles required for various instructions</p>
 <li>Conflict for use of a resource.</li>
 <li>Usually solved by throwing more hardware at the problem.</li>
 </ul>
-<p>Occurs in two scenarios:</p>
+<h3 class="mume-header" id="scenarios">Scenarios</h3>
+
 <ol>
 <li>Load/Store instruction trying to read/write memory while another instruction is being fetched
 <ul>
@@ -562,7 +563,8 @@ number of cycles required for various instructions</p>
 </ul>
 <p><img src="assets/data_hazard_example.png" alt></p>
 <p><strong>Instructions with red back arrows cannot be executed in time</strong></p>
-<p>Solutions:</p>
+<h3 class="mume-header" id="solutions">Solutions</h3>
+
 <ol>
 <li>
 <p>Reorder code structure (software solution):</p>
@@ -598,6 +600,47 @@ number of cycles required for various instructions</p>
 </ol>
 <p><strong>Note:</strong> We can change the ordering of instructions to fix the <code>lw</code> forwarding problem</p>
 <p><img src="assets/data_forwarding_load_reorder.png" alt></p>
+<h2 class="mume-header" id="control-hazards">Control Hazards</h2>
+
+<ul>
+<li>Occurs due to branching instructions</li>
+<li>Fetching instructions depends on branch outcome</li>
+<li>MIPS only has BEQ, BNE</li>
+</ul>
+<p>How much cycles are lost?</p>
+<p><img src="assets/control_hazard_cycles_lost.png" alt></p>
+<p>We lose 2 cycles if the branch is taken, because:</p>
+<ul>
+<li>One instruction is fetched and is in the register phase</li>
+<li>Another one is in fetch phase</li>
+</ul>
+<p><strong>Note:</strong> If we wait and get the branch result from the memory phase, we will lose 3 cycles instead.</p>
+<h3 class="mume-header" id="reducing-penalty">Reducing penalty</h3>
+
+<p>We can reduce the penalty to <strong>1 cycle</strong> if we add extra hardware to evaluate the branch result right after the register stage.</p>
+<p><img src="assets/control_hazard_reduce_penalty.png" alt></p>
+<p>This way we only need to deal with one wrongly fetched instruction.</p>
+<h3 class="mume-header" id="solutions-1">Solutions</h3>
+
+<p>After reducing the branch penalty to 1 cycle, we also need to fix the instruction fetched in that cycle</p>
+<ol>
+<li>Stall the pipeline
+<ul>
+<li>We can stall the pipeline if the branch is taken, which gives us time to flush the wrong instructions</li>
+<li>Inefficient solution</li>
+</ul>
+</li>
+<li>Predict the outcome of the branch, and fix if wrong
+<ul>
+<li>It is better to guess and be wrong sometimes than always wait</li>
+<li>Assume that the branch will be <strong>untaken</strong></li>
+<li>If it is not taken, then we have not wasted any cycles.</li>
+<li>If it is taken, insert a bubble and waste one cycle.</li>
+<li><img src="assets/control_hazards_branch_taken.png" alt></li>
+</ul>
+</li>
+</ol>
+<p><strong>Note:</strong> an old solution was to always execute the instruction after the branch anyway, and the software programmer had to either put an independent instruction to the branch or insert a NOP.</p>
 
       </div>
       
