@@ -309,5 +309,34 @@ After reducing the branch penalty to 1 cycle, we also need to fix the instructio
    - If it is not taken, then we have not wasted any cycles.
    - If it is taken, insert a bubble and waste one cycle.
    - ![](assets/control_hazards_branch_taken.png)
+3. Delayed Branch
+   - Execute the instruction after the branch anyway
+   - Put an independent instruction (doesn't affect branch condition) after the branch instruction
+   - Insert NOP if there is no independent instruction
+   - ![](assets/delayed_branch.png)
 
-**Note:** an old solution was to always execute the instruction after the branch anyway, and the software programmer had to either put an independent instruction to the branch or insert a NOP.
+### Dynamic branch prediction
+
+Instead of doing a static branch prediction (we always assume that the branch will be **untaken**), we can do better prediction by checking previous executions of that branch and seeing if it is usually taken or not.
+
+- We use a **Branch Prediction Buffer** which is a small fast memory (like a hashtable) that contains the addresses of the branch instructions and stores if it was recently taken or not
+- There are two types of branch prediction buffers:
+  - 1-bit predictor:
+    - Use the last outcome to predict whether the branch was taken or not
+    - ![](assets/one_level_branch_predictor.png)
+  - 2-bit predictor
+    - Contains more states to give branching extra chances to change its state
+    - ![](assets/two_level_branch_predictor.png)
+
+
+### Exceptions
+
+- Occurs due to errors in execution (division by zero, etc..)
+- We need to
+  - Transfer control to exception routine
+  - Flush wrongly fetched instructions
+  - Save address of offending instruction in Exception Program Counter (EPC)
+
+- We can change the H/W to handle exceptions as follows
+
+![](assets/exceptions_hw.png)

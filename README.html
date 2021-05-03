@@ -639,8 +639,56 @@ number of cycles required for various instructions</p>
 <li><img src="assets/control_hazards_branch_taken.png" alt></li>
 </ul>
 </li>
+<li>Delayed Branch
+<ul>
+<li>Execute the instruction after the branch anyway</li>
+<li>Put an independent instruction (doesn&apos;t affect branch condition) after the branch instruction</li>
+<li>Insert NOP if there is no independent instruction</li>
+<li><img src="assets/delayed_branch.png" alt></li>
+</ul>
+</li>
 </ol>
-<p><strong>Note:</strong> an old solution was to always execute the instruction after the branch anyway, and the software programmer had to either put an independent instruction to the branch or insert a NOP.</p>
+<h3 class="mume-header" id="dynamic-branch-prediction">Dynamic branch prediction</h3>
+
+<p>Instead of doing a static branch prediction (we always assume that the branch will be <strong>untaken</strong>), we can do better prediction by checking previous executions of that branch and seeing if it is usually taken or not.</p>
+<ul>
+<li>We use a <strong>Branch Prediction Buffer</strong> which is a small fast memory (like a hashtable) that contains the addresses of the branch instructions and stores if it was recently taken or not</li>
+<li>There are two types of branch prediction buffers:
+<ul>
+<li>1-bit predictor:
+<ul>
+<li>Use the last outcome to predict whether the branch was taken or not</li>
+<li><img src="assets/one_level_branch_predictor.png" alt></li>
+</ul>
+</li>
+<li>2-bit predictor
+<ul>
+<li>Contains more states to give branching extra chances to change its state</li>
+<li><img src="assets/two_level_branch_predictor.png" alt></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 class="mume-header" id="exceptions">Exceptions</h3>
+
+<ul>
+<li>
+<p>Occurs due to errors in execution (division by zero, etc..)</p>
+</li>
+<li>
+<p>We need to</p>
+<ul>
+<li>Transfer control to exception routine</li>
+<li>Flush wrongly fetched instructions</li>
+<li>Save address of offending instruction in Exception Program Counter (EPC)</li>
+</ul>
+</li>
+<li>
+<p>We can change the H/W to handle exceptions as follows</p>
+</li>
+</ul>
+<p><img src="assets/exceptions_hw.png" alt></p>
 
       </div>
       
